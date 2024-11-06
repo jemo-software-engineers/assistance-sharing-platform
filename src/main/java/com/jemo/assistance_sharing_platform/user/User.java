@@ -64,6 +64,9 @@ public class User {
     @Enumerated(EnumType.STRING)
     private UserRole role;
 
+//    @Column(nullable = true)
+//    List<Skillset> skillset;
+
     @Column(nullable = false, updatable = false)
     private LocalDateTime createdAt;
 

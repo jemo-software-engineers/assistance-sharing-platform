@@ -3,7 +3,6 @@ package com.jemo.assistance_sharing_platform.auth;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
@@ -43,7 +42,7 @@ public class SecurityConfig {
                 .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(authorize -> authorize
                         .requestMatchers("/api/auth/login", "/api/auth/register").permitAll()
-                        .requestMatchers(HttpMethod.GET, "/api/restaurants/**","/api/cuisine", "/api/cities", "/api/menus/**", "/api/menuitems/**", "/api/reviews/**").permitAll()
+//                        .requestMatchers(HttpMethod.GET, "/api/restaurants/**","/api/cuisine", "/api/cities", "/api/menus/**", "/api/menuitems/**", "/api/reviews/**").permitAll()
                         .requestMatchers("/admin/**").hasRole("ADMIN")
                         .anyRequest().authenticated()
                 )
