@@ -1,4 +1,4 @@
-package com.jemo.assistance_sharing_platform.user;
+package com.jemo.assistance_sharing_platform.skills;
 
 public enum ExperienceLevel {
     BEGINNER,

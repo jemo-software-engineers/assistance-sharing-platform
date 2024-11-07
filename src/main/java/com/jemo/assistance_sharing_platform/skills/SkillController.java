@@ -1,22 +1,31 @@
 package com.jemo.assistance_sharing_platform.skills;
 
+import com.jemo.assistance_sharing_platform.user.User;
+import com.jemo.assistance_sharing_platform.user.UserService;
+import lombok.Getter;
 import lombok.RequiredArgsConstructor;
+import lombok.Setter;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/admin")
+@Getter
+@Setter
 public class SkillController {
 
     private final SkillService skillsService;
+    private final UserService userService;
+    private final UserSkillService userSkillService;
 
     // Get all skills
 
-    @GetMapping("/api/skills")
+    @GetMapping("/admin/api/skills")
     public ResponseEntity<List<SkillResponse>> getSkills() {
         List<Skill> skills = skillsService.findAll();
 
@@ -32,7 +41,7 @@ public class SkillController {
     }
 
     // Get a single skill
-    @GetMapping("/api/skills/{id}")
+    @GetMapping("/admin/api/skills/{id}")
     public ResponseEntity<SkillResponse> getSkillById(@PathVariable Long id) {
 
         Skill skill = skillsService.findById(id);
@@ -43,9 +52,9 @@ public class SkillController {
         return new ResponseEntity<>(skillResponse, HttpStatus.OK);
     }
     // Add new skill
-    @PostMapping("/api/skills")
-    public ResponseEntity<String> createSkill(@RequestBody SkillRequest skillRequest) {
-        Boolean created = skillsService.create(skillRequest);
+    @PostMapping("/admin/api/skills")
+    public ResponseEntity<String> createSkill(@RequestBody AdminSkillRequest adminSkillRequest) {
+        Boolean created = skillsService.create(adminSkillRequest);
 
         if (created) {
             return new ResponseEntity<>("Skill created successfully", HttpStatus.CREATED);
@@ -55,9 +64,9 @@ public class SkillController {
     }
 
     // Update a skill
-    @PutMapping("/api/skills/{id}")
-    public ResponseEntity<String> updateSkill(@PathVariable Long id, @RequestBody SkillRequest skillRequest) {
-        Boolean updated = skillsService.updateById(id, skillRequest);
+    @PutMapping("/admin/api/skills/{id}")
+    public ResponseEntity<String> updateSkill(@PathVariable Long id, @RequestBody AdminSkillRequest adminSkillRequest) {
+        Boolean updated = skillsService.updateById(id, adminSkillRequest);
         if (updated) {
             return new ResponseEntity<>("Skill updated successfully", HttpStatus.OK);
         }
@@ -65,11 +74,56 @@ public class SkillController {
     }
 
     // Delete a skill
-    @DeleteMapping("/api/skills/{id}")
+    @DeleteMapping("/admin/api/skills/{id}")
     public ResponseEntity<String> deleteSkill(@PathVariable Long id) {
         Boolean deleted = skillsService.deleteById(id);
         if (deleted) {
             return new ResponseEntity<>("Skill deleted successfully", HttpStatus.OK);
+        }
+        return new ResponseEntity<>("Could not delete skill", HttpStatus.BAD_REQUEST);
+    }
+
+
+    // User add new skill to their profile
+    @PostMapping("/api/skills")
+    public ResponseEntity<String> addNewSkillToUser(@AuthenticationPrincipal UserDetails userDetails, @RequestBody UserSkillRequest userSkillRequest) {
+
+        User authenticatedUser = userService.findByUsername(userDetails.getUsername());
+        Boolean skillAdded = skillsService.addSkillToUser(authenticatedUser.getId(), userSkillRequest.skill(), userSkillRequest.experienceLevel());
+
+
+        if (skillAdded) {
+            return new ResponseEntity<>("Skill added successfully", HttpStatus.CREATED);
+        }
+        return new ResponseEntity<>("Could not add skill to user", HttpStatus.BAD_REQUEST);
+    }
+
+
+    // User update skill experience level
+    @PutMapping("/api/userskills/{id}")
+    public ResponseEntity<String> updateUserSkill(@AuthenticationPrincipal UserDetails userDetails, @PathVariable Long id, @RequestBody UserSkillRequest userSkillRequest) {
+        User authenticatedUser = userService.findByUsername(userDetails.getUsername());
+        UserSkill skill = userSkillService.findUserSkillById(id);
+        if(skill != null && authenticatedUser.getId().equals(skill.getUser().getId())) {
+            Boolean updated = skillsService.updateSkill(skill, authenticatedUser, userSkillRequest);
+            if (updated) {
+                return new ResponseEntity<>("Skill updated successfully", HttpStatus.OK);
+            }
+        }
+        return new ResponseEntity<>("Could not update skill", HttpStatus.BAD_REQUEST);
+    }
+
+
+    // User remove skill from their profile
+    @DeleteMapping("/api/userskills/{id}")
+    public ResponseEntity<String> deleteUserSkill(@AuthenticationPrincipal UserDetails userDetails, @PathVariable Long id) {
+        User authenticatedUser = userService.findByUsername(userDetails.getUsername());
+        UserSkill skill = userSkillService.findUserSkillById(id);
+        if(skill != null && authenticatedUser.getId().equals(skill.getUser().getId())) {
+            Boolean deleted = userSkillService.deleteById(id);
+            if (deleted) {
+                return new ResponseEntity<>("Skill deleted successfully", HttpStatus.OK);
+            }
         }
         return new ResponseEntity<>("Could not delete skill", HttpStatus.BAD_REQUEST);
     }

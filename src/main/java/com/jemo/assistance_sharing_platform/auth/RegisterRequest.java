@@ -6,5 +6,7 @@ public record RegisterRequest(
         String name,
         String phone,
         String address,
-        String password
+        String password,
+        String experienceLevel,
+        String skill
 ) {}

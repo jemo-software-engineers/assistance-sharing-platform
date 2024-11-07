@@ -1,5 +1,6 @@
 package com.jemo.assistance_sharing_platform.auth;
 
+import com.jemo.assistance_sharing_platform.skills.SkillService;
 import com.jemo.assistance_sharing_platform.user.User;
 import com.jemo.assistance_sharing_platform.user.UserRepository;
 import com.jemo.assistance_sharing_platform.user.UserRole;
@@ -35,6 +36,9 @@ public class AuthController {
     @Autowired
     private JwtUtil jwtUtil;
 
+    @Autowired
+    private SkillService skillService;
+
 
 
     @PostMapping("/register")
@@ -61,7 +65,11 @@ public class AuthController {
 
         User newUser = userRepository.save(createUser);
         if(newUser.getId() != null) {
-            return new ResponseEntity<>("User created successfully", HttpStatus.OK);
+            // attach the skill to the user
+            Boolean skillAdded = skillService.addSkillToUser(newUser.getId(), registerRequest.skill(), registerRequest.experienceLevel());
+            if(skillAdded) {
+                return new ResponseEntity<>("User created successfully", HttpStatus.OK);
+            }
         }
         return new ResponseEntity<>("User could not be created", HttpStatus.BAD_REQUEST);
     }

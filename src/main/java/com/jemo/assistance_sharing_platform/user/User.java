@@ -2,6 +2,7 @@ package com.jemo.assistance_sharing_platform.user;
 
 import com.fasterxml.jackson.annotation.JsonIdentityInfo;
 import com.fasterxml.jackson.annotation.ObjectIdGenerators;
+import com.jemo.assistance_sharing_platform.skills.UserSkill;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotEmpty;
@@ -9,6 +10,7 @@ import lombok.*;
 import org.springframework.lang.NonNull;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Entity
 @Builder
@@ -64,8 +66,9 @@ public class User {
     @Enumerated(EnumType.STRING)
     private UserRole role;
 
-//    @Column(nullable = true)
-//    List<Skillset> skillset;
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    @Column(nullable = true)
+    List<UserSkill> userSkills;
 
     @Column(nullable = false, updatable = false)
     private LocalDateTime createdAt;
