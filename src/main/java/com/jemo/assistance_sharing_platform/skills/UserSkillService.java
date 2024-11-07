@@ -3,6 +3,8 @@ package com.jemo.assistance_sharing_platform.skills;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+
 @Service
 @RequiredArgsConstructor
 public class UserSkillService {
@@ -19,5 +21,9 @@ public class UserSkillService {
             return true;
         }
         return false;
+    }
+
+    public List<UserSkill> findAllByUserId(Long id) {
+        return userSkillRepository.findAllByUserId(id);
     }
 }

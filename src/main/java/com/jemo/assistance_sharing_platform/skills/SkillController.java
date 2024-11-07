@@ -98,6 +98,24 @@ public class SkillController {
         return new ResponseEntity<>("Could not add skill to user", HttpStatus.BAD_REQUEST);
     }
 
+    // user get list of skills
+    @GetMapping("/api/userskills")
+    public ResponseEntity<List<UserSkillResponse>> getAllUserSkills(@AuthenticationPrincipal UserDetails userDetails) {
+        User authenticatedUser = userService.findByUsername(userDetails.getUsername());
+        List<UserSkill> userSkills = userSkillService.findAllByUserId(authenticatedUser.getId());
+
+        List<UserSkillResponse> userSkillResponses = userSkills.stream()
+                .map(skill -> {
+                    UserSkillResponse userSkillResponse = new UserSkillResponse();
+                    userSkillResponse.setId(skill.getId());
+                    userSkillResponse.setSkillName(skill.getSkill().getName());
+                    userSkillResponse.setExperienceLevel(String.valueOf(skill.getExperienceLevel()));
+                    return userSkillResponse;
+                }).toList();
+
+        return new ResponseEntity<>(userSkillResponses, HttpStatus.OK);
+    }
+
 
     // User update skill experience level
     @PutMapping("/api/userskills/{id}")
