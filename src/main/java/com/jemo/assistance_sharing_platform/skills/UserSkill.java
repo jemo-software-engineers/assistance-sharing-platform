@@ -26,4 +26,5 @@ public class UserSkill {
 
     @Enumerated(EnumType.STRING)
     private ExperienceLevel experienceLevel;
+
 }
