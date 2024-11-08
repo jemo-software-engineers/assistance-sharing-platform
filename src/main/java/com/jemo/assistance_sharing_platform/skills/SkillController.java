@@ -25,7 +25,7 @@ public class SkillController {
 
     // Get all skills
 
-    @GetMapping("/admin/api/skills")
+    @GetMapping("/api/skills")
     public ResponseEntity<List<SkillResponse>> getSkills() {
         List<Skill> skills = skillsService.findAll();
 
@@ -41,7 +41,7 @@ public class SkillController {
     }
 
     // Get a single skill
-    @GetMapping("/admin/api/skills/{id}")
+    @GetMapping("/api/skills/{id}")
     public ResponseEntity<SkillResponse> getSkillById(@PathVariable Long id) {
 
         Skill skill = skillsService.findById(id);
