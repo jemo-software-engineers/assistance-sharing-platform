@@ -24,6 +24,10 @@ public class SkillService {
         return skillsRepository.findById(id).orElse(null);
     }
 
+    public Skill findByName(String name) {
+        return skillsRepository.findByName(name);
+    }
+
     public Boolean create(AdminSkillRequest adminSkillRequest) {
         Skill skillExists = skillsRepository.findByName(adminSkillRequest.skill());
         if (skillExists != null) {

@@ -1,5 +1,7 @@
 package com.jemo.assistance_sharing_platform.skills;
 
+import com.fasterxml.jackson.annotation.JsonIdentityInfo;
+import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 import com.jemo.assistance_sharing_platform.user.User;
 import jakarta.persistence.*;
 import lombok.*;
@@ -10,6 +12,7 @@ import lombok.*;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
+@JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "id")
 public class UserSkill {
 
     @Id
