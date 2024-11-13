@@ -3,6 +3,7 @@ package com.jemo.assistance_sharing_platform.request;
 import com.jemo.assistance_sharing_platform.user.User;
 import com.jemo.assistance_sharing_platform.user.UserRole;
 import com.jemo.assistance_sharing_platform.user.UserService;
+import jakarta.transaction.Transactional;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
@@ -57,19 +58,11 @@ public class RequestController {
     public ResponseEntity<List<RequestUserResponse>> getAllRequests() {
         List<Request> retrievedRequests = requestService.findAll();
 
-        if(retrievedRequests != null) {
-            List<RequestUserResponse> userResponses = retrievedRequests.stream()
-                    .map(request -> {
-                        RequestUserResponse userResponse = ConvertRequestToRequestResponse(request);
-                        return userResponse;
-                    }).toList();
-
-            return new ResponseEntity<>(userResponses, HttpStatus.OK);
-        }
-        return new ResponseEntity<>(null, HttpStatus.NOT_FOUND);
+        return ConvertListOfRequestToListOfRequestResponse(retrievedRequests);
     }
 
 
+    // Update request
     @PutMapping("/api/requests/{id}")
     public ResponseEntity<String> updateRequest(@AuthenticationPrincipal UserDetails userDetails, @RequestBody RequestUserRequest userRequest, @PathVariable Long id) {
         User authenticatedUser = userService.findByUsername(userDetails.getUsername());
@@ -83,6 +76,7 @@ public class RequestController {
         return new ResponseEntity<>("Count not update request", HttpStatus.NOT_FOUND);
     }
 
+    // Delete Request
     @DeleteMapping("/api/requests/{id}")
     public ResponseEntity<String> deleteRequest(@AuthenticationPrincipal UserDetails userDetails, @PathVariable Long id) {
         User authenticatedUser = userService.findByUsername(userDetails.getUsername());
@@ -96,6 +90,57 @@ public class RequestController {
         return new ResponseEntity<>("Count not delete request", HttpStatus.NOT_FOUND);
     }
 
+
+
+    // Get a list of all pending requests due for approval
+    @GetMapping("/admin/api/requests")
+    public ResponseEntity<List<RequestUserResponse>> getAllPendingRequests() {
+        List<Request> retrievedRequests = requestService.findAllByPendingStatus();
+
+        return ConvertListOfRequestToListOfRequestResponse(retrievedRequests);
+    }
+
+
+    // Approve Request Decision For ADMIN
+    @Transactional
+    @PutMapping("/admin/api/requests/{requestId}/approve")
+    public ResponseEntity<String> approveRequest(@AuthenticationPrincipal UserDetails userDetails, @PathVariable Long requestId) {
+        User authenticatedUser = userService.findByUsername(userDetails.getUsername());
+        if (authenticatedUser.getRole().equals(UserRole.ADMIN)) {
+            Request approvedRequest = requestService.approveRequest(requestId);
+            if (approvedRequest.getStatus().equals(RequestStatus.OPEN)) {
+                return new ResponseEntity<>("Request Approved", HttpStatus.OK);
+            }
+        }
+
+        return new ResponseEntity<>("Review Approval Failed", HttpStatus.BAD_REQUEST);
+    }
+
+//    // Reject Request Decision For ADMIN
+    @Transactional
+    @PutMapping("/admin/api/requests/{requestId}/reject")
+    public ResponseEntity<String> rejectRequest(@AuthenticationPrincipal UserDetails userDetails, @PathVariable Long requestId) {
+        User authenticatedUser = userService.findByUsername(userDetails.getUsername());
+        if (authenticatedUser.getRole().equals(UserRole.ADMIN)) {
+            Request rejectedRequest = requestService.rejectRequest(requestId);
+            if (rejectedRequest.getStatus().equals(RequestStatus.REJECTED)) {
+                return new ResponseEntity<>("Request Rejected", HttpStatus.OK);
+            }
+        }
+
+        return new ResponseEntity<>("Review Rejection Failed", HttpStatus.BAD_REQUEST);
+    }
+
+
+
+
+
+
+
+
+
+
+
     private RequestUserResponse ConvertRequestToRequestResponse(Request request) {
         RequestUserResponse userResponse = new RequestUserResponse();
         userResponse.setId(request.getId());
@@ -106,5 +151,18 @@ public class RequestController {
         userResponse.setUser(request.getCreatedBy().getName());
         userResponse.setUserId(request.getCreatedBy().getId());
         return userResponse;
+    }
+
+    private ResponseEntity<List<RequestUserResponse>> ConvertListOfRequestToListOfRequestResponse(List<Request> retrievedRequests) {
+        if(retrievedRequests != null) {
+            List<RequestUserResponse> userResponses = retrievedRequests.stream()
+                    .map(request -> {
+                        RequestUserResponse userResponse = ConvertRequestToRequestResponse(request);
+                        return userResponse;
+                    }).toList();
+
+            return new ResponseEntity<>(userResponses, HttpStatus.OK);
+        }
+        return new ResponseEntity<>(null, HttpStatus.NOT_FOUND);
     }
 }

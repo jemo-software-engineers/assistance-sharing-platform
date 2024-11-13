@@ -66,4 +66,26 @@ public class RequestService {
         }
         return false;
     }
+
+    public List<Request> findAllByPendingStatus() {
+        return requestRepository.findAllByStatus(RequestStatus.PENDING);
+    }
+
+    public Request approveRequest(Long requestId) {
+        Request request = findById(requestId);
+        if (request != null) {
+            request.setStatus(RequestStatus.OPEN);
+            return requestRepository.save(request);
+        }
+        return null;
+    }
+
+    public Request rejectRequest(Long requestId) {
+        Request request = findById(requestId);
+        if (request != null) {
+            request.setStatus(RequestStatus.REJECTED);
+            return requestRepository.save(request);
+        }
+        return null;
+    }
 }

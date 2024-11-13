@@ -5,5 +5,6 @@ public enum RequestStatus {
     OPEN,
     INPROGRESS,
     CLOSED,
+    REJECTED,
     COMPLETED
 }
