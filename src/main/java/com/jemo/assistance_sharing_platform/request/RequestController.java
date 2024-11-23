@@ -132,6 +132,20 @@ public class RequestController {
     }
 
 
+    // Complete a request and rate the helper
+    @PutMapping("/api/requests/{requestId}/complete")
+    public ResponseEntity<String> completeRequest(@AuthenticationPrincipal UserDetails userDetails, @PathVariable Long requestId) {
+        User authenticatedUser = userService.findByUsername(userDetails.getUsername());
+        Request retrievedRequest = requestService.findById(requestId);
+        if ((retrievedRequest.getCreatedBy().equals(authenticatedUser)) || authenticatedUser.getRole().equals(UserRole.ADMIN)) {
+            Boolean completed = requestService.completeById(requestId);
+            if(completed) {
+                return new ResponseEntity<>("Request Successfully Marked as Complete", HttpStatus.OK);
+            }
+        }
+        return new ResponseEntity<>("Count not complete request", HttpStatus.NOT_FOUND);
+    }
+
 
 
 
@@ -142,15 +156,7 @@ public class RequestController {
 
 
     private RequestUserResponse ConvertRequestToRequestResponse(Request request) {
-        RequestUserResponse userResponse = new RequestUserResponse();
-        userResponse.setId(request.getId());
-        userResponse.setTitle(request.getTitle());
-        userResponse.setDescription(request.getDescription());
-        userResponse.setAssociatedSkill(request.getAssociatedSkill().getName());
-        userResponse.setStatus(request.getStatus().name());
-        userResponse.setUser(request.getCreatedBy().getName());
-        userResponse.setUserId(request.getCreatedBy().getId());
-        return userResponse;
+        return RequestService.convertRequestToRequestUserResponse(request);
     }
 
     private ResponseEntity<List<RequestUserResponse>> ConvertListOfRequestToListOfRequestResponse(List<Request> retrievedRequests) {
@@ -165,4 +171,7 @@ public class RequestController {
         }
         return new ResponseEntity<>(null, HttpStatus.NOT_FOUND);
     }
+
+
+
 }

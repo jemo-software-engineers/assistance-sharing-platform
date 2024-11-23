@@ -1,5 +1,9 @@
 package com.jemo.assistance_sharing_platform.user;
 
+import com.jemo.assistance_sharing_platform.skills.SkillService;
+import com.jemo.assistance_sharing_platform.skills.UserSkill;
+import com.jemo.assistance_sharing_platform.skills.UserSkillResponse;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -8,30 +12,19 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/admin/api")
+@RequiredArgsConstructor
 //@PreAuthorize("hasRole('ADMIN')")
 public class AdminUserController {
     private final UserService userService;
+    private final SkillService skillService;
 
-    public AdminUserController(UserService userService) {
-        this.userService = userService;
-    }
 
     @GetMapping("/users")
     public ResponseEntity<List<UserResponse>> getAllUsers() {
         List<User> allUsers = userService.getAllUsers();
         List<UserResponse> allUsersResponseDTO = allUsers.stream()
                 .map(user -> {
-                    UserResponse userResponse = new UserResponse();
-                    userResponse.setId(user.getId());
-                    userResponse.setUsername(user.getUsername());
-                    userResponse.setEmail(user.getEmail());
-                    userResponse.setRole(user.getRole().toString());
-                    userResponse.setName(user.getName());
-                    userResponse.setPhone(user.getPhone());
-                    userResponse.setAddress(user.getAddress());
-                    userResponse.setIsAvailable(user.getIsAvailable());
-                    userResponse.setPointScore(user.getPointScore());
-                    return userResponse;
+                    return convertUserToUserResponse(user);
                 }).toList();
 
         return new ResponseEntity<>(allUsersResponseDTO, HttpStatus.OK);
@@ -41,22 +34,14 @@ public class AdminUserController {
     public ResponseEntity<UserResponse> getUserById(@PathVariable Long id) {
         User user = userService.findUserById(id);
         if(user != null) {
-            UserResponse userResponse = new UserResponse();
-            userResponse.setId(user.getId());
-            userResponse.setUsername(user.getUsername());
-            userResponse.setEmail(user.getEmail());
-            userResponse.setRole(user.getRole().toString());
-            userResponse.setName(user.getName());
-            userResponse.setPhone(user.getPhone());
-            userResponse.setAddress(user.getAddress());
-            userResponse.setIsAvailable(user.getIsAvailable());
-            userResponse.setPointScore(user.getPointScore());
 
+            UserResponse userResponse = convertUserToUserResponse(user);
 
             return new ResponseEntity<>(userResponse, HttpStatus.OK);
         }
         return new ResponseEntity<>(HttpStatus.NOT_FOUND);
     }
+
 
 
     @PutMapping("/users/{id}")
@@ -76,6 +61,32 @@ public class AdminUserController {
         }
         return new ResponseEntity<>("User could not be deleted", HttpStatus.BAD_REQUEST);
     }
+
+
+
+
+
+    private UserResponse convertUserToUserResponse(User user) {
+        List<UserSkill> skills = user.getUserSkills();
+        List<UserSkillResponse> skillResponses = SkillService.convertListOfSkillsToSkillsResponse(skills);
+
+
+        UserResponse userResponse = new UserResponse();
+        userResponse.setId(user.getId());
+        userResponse.setUsername(user.getUsername());
+        userResponse.setEmail(user.getEmail());
+        userResponse.setRole(user.getRole().toString());
+        userResponse.setName(user.getName());
+        userResponse.setPhone(user.getPhone());
+        userResponse.setAddress(user.getAddress());
+        userResponse.setSkills(skillResponses);
+        userResponse.setIsAvailable(user.getIsAvailable());
+        userResponse.setPointScore(user.getPointScore());
+
+        return userResponse;
+    }
+
+
 
 }
 

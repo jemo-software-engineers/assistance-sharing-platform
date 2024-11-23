@@ -90,4 +90,15 @@ public class SkillService {
         userSkillRepository.save(updatedUserSkill);
         return true;
     }
+
+    public static List<UserSkillResponse> convertListOfSkillsToSkillsResponse(List<UserSkill> skills) {
+        return skills.stream()
+                .map(skill -> {
+                    UserSkillResponse userSkillResponse = new UserSkillResponse();
+                    userSkillResponse.setId(skill.getId());
+                    userSkillResponse.setSkillName(skill.getSkill().getName());
+                    userSkillResponse.setExperienceLevel(skill.getExperienceLevel().name());
+                    return userSkillResponse;
+                }).toList();
+    }
 }

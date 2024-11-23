@@ -88,4 +88,30 @@ public class RequestService {
         }
         return null;
     }
+
+    public static RequestUserResponse convertRequestToRequestUserResponse(Request request) {
+        RequestUserResponse userResponse = new RequestUserResponse();
+        userResponse.setId(request.getId());
+        userResponse.setTitle(request.getTitle());
+        userResponse.setDescription(request.getDescription());
+        userResponse.setAssociatedSkill(request.getAssociatedSkill().getName());
+        userResponse.setStatus(request.getStatus().name());
+        userResponse.setUser(request.getCreatedBy().getName());
+        userResponse.setUserId(request.getCreatedBy().getId());
+        return userResponse;
+    }
+
+    public void setStatus(Request request, RequestStatus requestStatus) {
+        request.setStatus(requestStatus);
+        requestRepository.save(request);
+    }
+
+    public Boolean completeById(Long requestId) {
+        Request request = findById(requestId);
+        if (request != null) {
+            request.setStatus(RequestStatus.COMPLETED);
+            requestRepository.save(request);
+        }
+        return null;
+    }
 }
