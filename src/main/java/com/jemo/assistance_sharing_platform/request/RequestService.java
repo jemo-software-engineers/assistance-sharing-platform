@@ -1,5 +1,7 @@
 package com.jemo.assistance_sharing_platform.request;
 
+import com.jemo.assistance_sharing_platform.offer.Offer;
+import com.jemo.assistance_sharing_platform.offer.OfferStatus;
 import com.jemo.assistance_sharing_platform.skills.Skill;
 import com.jemo.assistance_sharing_platform.skills.SkillService;
 import com.jemo.assistance_sharing_platform.user.User;
@@ -7,6 +9,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -111,6 +114,20 @@ public class RequestService {
         if (request != null) {
             request.setStatus(RequestStatus.COMPLETED);
             requestRepository.save(request);
+            return true;
+        }
+        return null;
+    }
+
+    public User findRequestApprovedUser(Long requestId) {
+        Request request = findById(requestId);
+        if (request != null && request.getOffers() != null) {
+            List<Offer> offers = request.getOffers();
+            Optional<Offer> completedOffer = offers.stream()
+                    .filter(offer -> offer.getStatus().equals(OfferStatus.ACCEPTED))
+                    .findFirst();
+            System.out.println(completedOffer.toString());
+           return completedOffer.get().getUserId();
         }
         return null;
     }

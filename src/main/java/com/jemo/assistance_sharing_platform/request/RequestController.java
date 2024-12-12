@@ -133,6 +133,7 @@ public class RequestController {
 
 
     // Complete a request and rate the helper
+    @Transactional
     @PutMapping("/api/requests/{requestId}/complete")
     public ResponseEntity<String> completeRequest(@AuthenticationPrincipal UserDetails userDetails, @PathVariable Long requestId) {
         User authenticatedUser = userService.findByUsername(userDetails.getUsername());
@@ -140,7 +141,14 @@ public class RequestController {
         if ((retrievedRequest.getCreatedBy().equals(authenticatedUser)) || authenticatedUser.getRole().equals(UserRole.ADMIN)) {
             Boolean completed = requestService.completeById(requestId);
             if(completed) {
-                return new ResponseEntity<>("Request Successfully Marked as Complete", HttpStatus.OK);
+                // retrieve accepted offer user, and update point score
+                User approvedUser = requestService.findRequestApprovedUser(requestId);
+                if (approvedUser.getId() != null) {
+                    Boolean pointUpdated = userService.updateUserPointScore(approvedUser);
+                    if (pointUpdated) {
+                        return new ResponseEntity<>("Request Successfully Marked as Complete", HttpStatus.OK);
+                    }
+                }
             }
         }
         return new ResponseEntity<>("Count not complete request", HttpStatus.NOT_FOUND);

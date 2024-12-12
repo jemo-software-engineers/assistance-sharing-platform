@@ -56,4 +56,10 @@ public class UserService {
     public User findByUsername(String username) {
         return userRepository.findByUsername(username);
     }
+
+    public Boolean updateUserPointScore(User approvedUser) {
+        approvedUser.setPointScore(approvedUser.getPointScore() + 5);
+        userRepository.save(approvedUser);
+        return true;
+    }
 }

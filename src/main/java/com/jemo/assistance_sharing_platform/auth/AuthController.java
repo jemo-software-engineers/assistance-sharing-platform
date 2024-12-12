@@ -67,12 +67,14 @@ public class AuthController {
                 .build();
 
         User newUser = userRepository.save(createUser);
-        if(newUser.getId() != null) {
+        if(newUser.getId() != null && registerRequest.skill() != null) {
             // attach the skill to the user
             Boolean skillAdded = skillService.addSkillToUser(newUser.getId(), registerRequest.skill(), registerRequest.experienceLevel());
             if(skillAdded) {
                 return new ResponseEntity<>("User created successfully", HttpStatus.OK);
             }
+        } else if (newUser.getId() != null) {
+            return new ResponseEntity<>("User created successfully", HttpStatus.OK);
         }
         return new ResponseEntity<>("User could not be created", HttpStatus.BAD_REQUEST);
     }
