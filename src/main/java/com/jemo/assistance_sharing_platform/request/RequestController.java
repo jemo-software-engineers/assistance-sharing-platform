@@ -61,6 +61,17 @@ public class RequestController {
         return ConvertListOfRequestToListOfRequestResponse(retrievedRequests);
     }
 
+    // Get all requests for logged-in user
+    @GetMapping("/api/my-requests")
+    public ResponseEntity<List<RequestUserResponse>> getAllRequestsForLoggedInUser(@AuthenticationPrincipal UserDetails userDetails) {
+        User authenticatedUser = userService.findByUsername(userDetails.getUsername());
+        if (authenticatedUser != null) {
+            List<Request> retrievedRequests = requestService.findAllByUserId(authenticatedUser.getId());
+            return ConvertListOfRequestToListOfRequestResponse(retrievedRequests);
+        }
+        return new ResponseEntity<>(null, HttpStatus.NOT_FOUND);
+    }
+
 
     // Update request
     @PutMapping("/api/requests/{id}")

@@ -74,6 +74,10 @@ public class RequestService {
         return requestRepository.findAllByStatus(RequestStatus.PENDING);
     }
 
+    public List<Request> findAllByUserId(Long id) {
+        return requestRepository.findAllByCreatedById(id);
+    }
+
     public Request approveRequest(Long requestId) {
         Request request = findById(requestId);
         if (request != null) {
@@ -131,4 +135,6 @@ public class RequestService {
         }
         return null;
     }
+
+
 }
