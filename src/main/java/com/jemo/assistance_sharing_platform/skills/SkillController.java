@@ -11,7 +11,9 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @RestController
 @RequiredArgsConstructor
@@ -144,5 +146,12 @@ public class SkillController {
             }
         }
         return new ResponseEntity<>("Could not delete skill", HttpStatus.BAD_REQUEST);
+    }
+
+    @GetMapping("/api/skills/experience_level")
+    public List<String> getExperienceLevel() {
+        return Arrays.stream(ExperienceLevel.values())
+                .map(Enum::name)
+                .collect(Collectors.toList());
     }
 }

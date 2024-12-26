@@ -13,7 +13,9 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
 
 
 @RestController
@@ -163,6 +165,13 @@ public class RequestController {
             }
         }
         return new ResponseEntity<>("Count not complete request", HttpStatus.NOT_FOUND);
+    }
+
+    @GetMapping("/api/requests/get_status")
+    public List<String> getRequestStatus() {
+        return Arrays.stream(RequestStatus.values())
+                .map(Enum::name)
+                .collect(Collectors.toList());
     }
 
 
