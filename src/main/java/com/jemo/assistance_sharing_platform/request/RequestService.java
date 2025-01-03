@@ -39,7 +39,7 @@ public class RequestService {
     }
 
     public List<Request> findAll() {
-        return requestRepository.findAll();
+        return requestRepository.findAllByStatus(RequestStatus.OPEN);
     }
 
     public Boolean updateById(Long id, RequestUserRequest userRequest) {
